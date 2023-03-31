@@ -6,7 +6,6 @@ const app = express()
 
 app.use(express.json()) //obrigatório
 
-const tarefas = []
 
 connection.authenticate()
 connection.sync()
@@ -35,15 +34,18 @@ app.post('/tarefas', async (request, response) => {
 
         response.status(201).json(newTask) // recomendada
     } catch (error) {
-        response.status(500).json({message: 'Não conseguimos processar sua solicitação.'})
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
 })
 
-app.get('/tarefas', (request, response) => {
-    response.json(tarefas)
+app.get('/tarefas', async (request, response) => {
+    try {
+        const tasks = await Task.findAll()
+        response.json(tasks)
+    } catch (error) {
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
+    }
 })
-
-
 
 app.listen(3333, () => console.log("Aplicação online"))
 
@@ -53,5 +55,5 @@ app.listen(3333, () => console.log("Aplicação online"))
         // false false
         // null false
         // undefined false
-        
+
 
