@@ -8,7 +8,7 @@ const connection = new Sequelize({
     port:'5432', // qual porta
     database: 'tarefas_database', //qual nome de dados
     define: {
-      timestamps: true,
+      timestamps: true,  
       underscored: true,
       underscoredAll: true,
     },
