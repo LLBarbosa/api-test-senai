@@ -30,10 +30,21 @@ app.post('/tarefas', async (request, response) => {
                 .json({ message: 'Nome/Descrição é obrigatório' })
         }
 
+        const taskInDatabase = await Task.findOne(
+            { where: { name: tarefa.name } }
+        ) // SELEC FROM taks where name = ''
+
+        if(taskInDatabase) {
+            return response
+            .status(400)
+            .json({ message: 'Já existe uma tarefa com esse nome' })
+        }
+       
         const newTask = await Task.create(tarefa)
 
         response.status(201).json(newTask) // recomendada
     } catch (error) {
+        console.log(error)
         response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
 })
