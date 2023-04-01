@@ -58,6 +58,20 @@ app.get('/tarefas', async (request, response) => {
     }
 })
 
+
+app.delete('/tarefas/:id', async (request, response) => {
+    
+    await Task.destroy({
+        where: {
+            id:  request.params.id
+        }
+    })
+
+    response.status(200).json({message: 'criado com sucesso'})
+    //response.status(204).json()
+    // delete from tasks where id = id que recebi
+})
+
 app.listen(3333, () => console.log("Aplicação online"))
 
 
