@@ -34,12 +34,12 @@ app.post('/tarefas', async (request, response) => {
             { where: { name: tarefa.name } }
         ) // SELEC FROM taks where name = ''
 
-        if(taskInDatabase) {
+        if (taskInDatabase) {
             return response
-            .status(400)
-            .json({ message: 'Já existe uma tarefa com esse nome' })
+                .status(400)
+                .json({ message: 'Já existe uma tarefa com esse nome' })
         }
-       
+
         const newTask = await Task.create(tarefa)
 
         response.status(201).json(newTask) // recomendada
@@ -60,16 +60,24 @@ app.get('/tarefas', async (request, response) => {
 
 
 app.delete('/tarefas/:id', async (request, response) => {
-    
-    await Task.destroy({
-        where: {
-            id:  request.params.id
-        }
-    })
 
-    response.status(200).json({message: 'criado com sucesso'})
-    //response.status(204).json()
-    // delete from tasks where id = id que recebi
+    try {
+
+        await Task.destroy({
+            where: {
+                id: request.params.id
+            }
+        })
+
+        response.status(200).json({ message: 'deletado com sucesso' })
+        //response.status(204).json()
+        // delete from tasks where id = id que recebi
+
+    } catch (error) {
+    response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
+    }
+
+
 })
 
 app.listen(3333, () => console.log("Aplicação online"))
