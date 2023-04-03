@@ -58,7 +58,6 @@ app.get('/tarefas', async (request, response) => {
     }
 })
 
-
 app.delete('/tarefas/:id', async (request, response) => {
 
     try {
@@ -77,6 +76,31 @@ app.delete('/tarefas/:id', async (request, response) => {
     response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
 
+
+})
+
+app.put('/tarefas/:id', async (request, response) => {
+
+    try {
+        const taskInDatabase = await Task.findByPk(request.params.id) // select from tasks where id = ?
+
+        if(!taskInDatabase) {
+            return response
+            .status(404)
+            .json({message: 'Tarefa não encontrado'})
+        }
+
+        taskInDatabase.name = request.body.name
+        taskInDatabase.description = request.body.description
+
+        await taskInDatabase.save() // UPDATE 
+
+        response.json(taskInDatabase)
+        
+    } catch (error) {
+        console.log(error)
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
+    }
 
 })
 
