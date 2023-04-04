@@ -1,4 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcrypt')
+
 const connection = require('./src/database');
 
 const Task = require('./src/models/task')
@@ -10,7 +12,7 @@ app.use(express.json()) //obrigatório
 
 
 connection.authenticate()
-connection.sync({alter: true})
+connection.sync({ alter: true })
 console.log('Connection has been established successfully.');
 
 app.get('/', (request, response) => {
@@ -112,15 +114,34 @@ app.put('/tarefas/:id', async (request, response) => {
 
 app.post('/users', async (request, response) => {
     try {
+
+        const userInDatabase = await User.findOne({
+            where: {
+                cpf: request.body.cpf
+            }
+        })
+
+        if (userInDatabase) {
+            return response
+                .status(409)
+                .json({ message: 'Já existe um usuário com essa conta' })
+        }
+
+
+        const hash = await bcrypt.hash(request.body.password, 10)
+
         const newUser = {
             name: request.body.name,
             cpf: request.body.cpf,
-            password: request.body.password
+            password: hash
         }
 
-       const user = await User.create(newUser)
-        
-       response.status(201).json(user)
+
+        // criptografar a senha 
+
+        const user = await User.create(newUser)
+
+        response.status(201).json(user)
 
     } catch (error) {
         response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
