@@ -1,6 +1,8 @@
 const express = require('express');
 const connection = require('./src/database');
+
 const Task = require('./src/models/task')
+const User = require('./src/models/user')
 
 const app = express()
 
@@ -8,7 +10,7 @@ app.use(express.json()) //obrigatório
 
 
 connection.authenticate()
-connection.sync()
+connection.sync({alter: true})
 console.log('Connection has been established successfully.');
 
 app.get('/', (request, response) => {
@@ -73,7 +75,7 @@ app.delete('/tarefas/:id', async (request, response) => {
         // delete from tasks where id = id que recebi
 
     } catch (error) {
-    response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
 
 
@@ -82,26 +84,47 @@ app.delete('/tarefas/:id', async (request, response) => {
 app.put('/tarefas/:id', async (request, response) => {
 
     try {
+
         const taskInDatabase = await Task.findByPk(request.params.id) // select from tasks where id = ?
 
-        if(!taskInDatabase) {
+        if (!taskInDatabase) {
             return response
-            .status(404)
-            .json({message: 'Tarefa não encontrado'})
+                .status(404)
+                .json({ message: 'Tarefa não encontrado' })
         }
 
-        taskInDatabase.name = request.body.name
-        taskInDatabase.description = request.body.description
+        taskInDatabase.name = request.body.name || taskInDatabase.name
+        taskInDatabase.description = request.body.description || taskInDatabase.description
+
+        console.log(taskInDatabase)
 
         await taskInDatabase.save() // UPDATE 
 
         response.json(taskInDatabase)
-        
+
     } catch (error) {
         console.log(error)
         response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
 
+})
+
+
+app.post('/users', async (request, response) => {
+    try {
+        const newUser = {
+            name: request.body.name,
+            cpf: request.body.cpf,
+            password: request.body.password
+        }
+
+       const user = await User.create(newUser)
+        
+       response.status(201).json(user)
+
+    } catch (error) {
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
+    }
 })
 
 app.listen(3333, () => console.log("Aplicação online"))
