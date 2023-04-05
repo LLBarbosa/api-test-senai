@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const connection = require('./src/database');
 
@@ -168,7 +169,17 @@ app.post('/users/login', async (request, response) => {
             return response.status(404).json({ message: 'Crendeciais incorreta[password]' })
         }
 
-        response.json({ message: 'Login realizado sucesso' })
+        const token = jwt.sign(
+            {
+                id: userInDatabase.id
+            },
+            'MINHA_CHAVE_SECRETA',
+            {
+                expiresIn: '1h'
+            }
+        )
+
+        response.json({ name: userInDatabase.name, token: token })
 
     } catch (error) {
         response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
