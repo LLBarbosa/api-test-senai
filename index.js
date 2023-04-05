@@ -150,25 +150,29 @@ app.post('/users', async (request, response) => {
 
 app.post('/users/login', async (request, response) => {
 
-    const userInDatabase = await User.findOne({
-        where: {
-            cpf: request.body.cpf
+    try {
+        const userInDatabase = await User.findOne({
+            where: {
+                cpf: request.body.cpf
+            }
+        })
+        // verifica cpf
+        if (!userInDatabase) {
+            return response.status(404).json({ message: 'Cpf ou senha incorretos' })
         }
-    })
-    // verifica cpf
-    if (!userInDatabase) {
-        return response.status(404).json({ message: 'Cpf ou senha incorretos' })
+
+        const passwordIsValid = await bcrypt.compare(request.body.password, userInDatabase.password)
+
+        // verifica se a senha está correta 
+        if (!passwordIsValid) {
+            return response.status(404).json({ message: 'Crendeciais incorreta[password]' })
+        }
+
+        response.json({ message: 'Login realizado sucesso' })
+
+    } catch (error) {
+        response.status(500).json({ message: 'Não conseguimos processar sua solicitação.' })
     }
-
-    const passwordIsValid = await bcrypt.compare(request.body.password, userInDatabase.password)
-
-    if(!passwordIsValid) {
-        return response.status(404).json({message: 'Crendeciais incorreta[password]'})
-    }
-
-    response.json({message: 'Login realizado sucesso'})
-
-    // verifica se a senha está correta 
 })
 
 app.listen(3333, () => console.log("Aplicação online"))
